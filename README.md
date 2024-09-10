@@ -1,7 +1,8 @@
 # OpenWeatherMap Spring Boot Application
 
-![Screenshot (369)](https://github.com/user-attachments/assets/7c8ccf04-7bad-41bc-b871-7fb206056fe9)
-![Screenshot (370)](https://github.com/user-attachments/assets/80301e0b-409a-4540-85a3-1e45c6c0c2ea)
+![Screenshot (372)](https://github.com/user-attachments/assets/fd094e8f-f2fe-40c1-b3e1-fb135040489a)
+
+![Screenshot (373)](https://github.com/user-attachments/assets/f87462a8-be72-46cf-afc6-d49f4c49372f)
 
 
 This project is a simple web application built using Spring Boot and Thymeleaf that integrates with the [OpenWeatherMap API](https://openweathermap.org/api) to fetch and display weather data for a specified city.
