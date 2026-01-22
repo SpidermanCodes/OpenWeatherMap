@@ -1,38 +1,172 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/image.png') no-repeat center center fixed;
-    background-size: cover;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.navbar {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.main-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-header-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-family: 'Arial', sans-serif;
+    padding: 2rem;
+    text-align: center;
 }
-.container {
-    margin-top: 100px;
+
+.card-body-custom {
+    padding: 2rem;
 }
-.card {
-    background-color: rgba(0, 0, 0, 0.6);
+
+.search-form .form-control {
+    border: 2px solid #e0e0e0;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s, box-shadow 0.3s;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
 }
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+
+.search-form .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
-.form-control {
-    background-color: rgba(255, 255, 255, 0.7);
+
+.input-group-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     border: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    border-radius: 10px 0 0 10px;
 }
-.form-control:focus {
-    background-color: rgba(255, 255, 255, 0.9);
-}
+
 .btn-primary {
-    background-color: #007bff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    border-radius: 5px;
-    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 0 10px 10px 0;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
+
 .btn-primary:hover {
-    background-color: #0056b3;
     transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.favorites-section {
+    animation: slideUp 0.7s ease-out;
+}
+
+.favorite-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.favorite-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.favorite-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    flex: 1;
+}
+
+.favorite-link:hover {
+    color: #667eea;
+}
+
+.country-badge {
+    background: #667eea;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    margin-left: 10px;
+}
+
+.features-section {
+    animation: slideUp 0.9s ease-out;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.feature-card i {
+    font-size: 3rem;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+
+.feature-card h5 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.footer {
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+.location-section .btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
 }

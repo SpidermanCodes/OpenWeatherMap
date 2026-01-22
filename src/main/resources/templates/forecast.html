@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-Day Forecast</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/forecast.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-cloud-sun"></i> Weather Dashboard
+            </a>
+            <div class="ms-auto">
+                <a href="/" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div th:if="${error != null and error != ''}" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <div th:if="${error == null or error == ''}">
+            <div class="forecast-header">
+                <h1><i class="fas fa-calendar-alt"></i> 5-Day Forecast</h1>
+                <h3 th:text="${city + ', ' + country}"></h3>
+            </div>
+
+            <div class="forecast-container">
+                <div th:each="dateEntry : ${forecastByDate}" class="forecast-day">
+                    <div class="day-header">
+                        <h4 th:text="${dateEntry.key}"></h4>
+                    </div>
+                    <div class="forecast-items">
+                        <div th:each="item : ${dateEntry.value}" class="forecast-item">
+                            <div class="forecast-time">
+                                <span th:text="${item.dtTxt != null ? item.dtTxt.substring(11, 16) : ''}"></span>
+                            </div>
+                            <div class="forecast-icon">
+                                <img th:src="${'https://openweathermap.org/img/wn/' + item.weather[0].icon + '@2x.png'}" 
+                                     alt="Weather Icon">
+                            </div>
+                            <div class="forecast-temp">
+                                <span class="temp-high" th:text="${#numbers.formatDecimal(item.main.tempMax, 0, 0) + '°C'}"></span>
+                                <span class="temp-low" th:text="${#numbers.formatDecimal(item.main.tempMin, 0, 0) + '°C'}"></span>
+                            </div>
+                            <div class="forecast-details">
+                                <small>
+                                    <i class="fas fa-tint"></i> <span th:text="${item.main.humidity + '%'}"></span>
+                                    <i class="fas fa-wind ms-2"></i> <span th:text="${#numbers.formatDecimal(item.wind.speed, 1, 1) + ' m/s'}"></span>
+                                </small>
+                                <p class="description" th:text="${item.weather[0].description}"></p>
+                                <div th:if="${item.rain}" class="rain-info">
+                                    <i class="fas fa-cloud-rain"></i> 
+                                    <span th:text="${#numbers.formatDecimal(item.rain.threeH, 1, 1) + ' mm'}"></span>
+                                </div>
+                                <div th:if="${item.snow}" class="snow-info">
+                                    <i class="fas fa-snowflake"></i> 
+                                    <span th:text="${#numbers.formatDecimal(item.snow.threeH, 1, 1) + ' mm'}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temperature Chart -->
+            <div class="chart-container mt-4">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 Weather Dashboard - Powered by OpenWeatherMap API</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const forecastData = /*[[${forecastList}]]*/ [];
+        
+        if (forecastData && forecastData.length > 0) {
+            const ctx = document.getElementById('temperatureChart').getContext('2d');
+            const labels = forecastData.map(item => {
+                const date = new Date(item.dt * 1000);
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            });
+            const temps = forecastData.map(item => Math.round(item.main.temp));
+            const feelsLike = forecastData.map(item => Math.round(item.main.feelsLike));
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: temps,
+                        borderColor: 'rgb(102, 126, 234)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Feels Like (°C)',
+                        data: feelsLike,
+                        borderColor: 'rgb(118, 75, 162)',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Temperature Forecast'
+                        },
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>
+

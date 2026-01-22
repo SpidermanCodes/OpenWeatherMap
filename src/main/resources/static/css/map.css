@@ -1,0 +1,240 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.map-header {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    margin-bottom: 2rem;
+}
+
+.map-header h1 {
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.map-header p {
+    color: #666;
+    margin: 0;
+}
+
+.map-controls {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.map-controls .form-control {
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px 15px;
+}
+
+.map-controls .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.map-controls .btn {
+    border-radius: 10px;
+    margin-left: 0.5rem;
+}
+
+.layer-control-info {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0.5rem;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.layer-control-info i {
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.weather-map {
+    height: 600px;
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.map-info {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.info-card i {
+    font-size: 2.5rem;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+
+.info-card h5 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.info-card p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.data-source-info .alert {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.data-source-info h6 {
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.data-source-info p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.data-source-info a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.data-source-info a:hover {
+    text-decoration: underline;
+}
+
+.footer {
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+.weather-legend {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    max-width: 250px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-size: 0.85rem;
+}
+
+.legend-header {
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #333;
+}
+
+.legend-item {
+    margin-bottom: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.legend-item:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.legend-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #667eea;
+    font-size: 0.9rem;
+}
+
+.legend-note {
+    margin-bottom: 8px;
+    color: #999;
+    font-style: italic;
+}
+
+.legend-note i {
+    color: #667eea;
+    margin-right: 3px;
+}
+
+.legend-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legend-row span:last-child {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .weather-map {
+        height: 400px;
+    }
+    
+    .weather-legend {
+        max-width: 200px;
+        font-size: 0.75rem;
+    }
+}
+
+
+
+
+
+

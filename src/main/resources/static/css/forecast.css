@@ -1,0 +1,151 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.forecast-header {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.forecast-header h1 {
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.forecast-header h3 {
+    color: #333;
+    font-weight: 400;
+}
+
+.forecast-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.forecast-day {
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 1.5rem;
+}
+
+.forecast-day:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.day-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.day-header h4 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.forecast-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.forecast-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.forecast-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    background: white;
+}
+
+.forecast-time {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.forecast-icon img {
+    width: 60px;
+    height: 60px;
+}
+
+.forecast-temp {
+    margin: 0.5rem 0;
+}
+
+.temp-high {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.temp-low {
+    font-size: 1rem;
+    color: #666;
+    margin-left: 0.5rem;
+}
+
+.forecast-details {
+    margin-top: 0.5rem;
+}
+
+.forecast-details small {
+    color: #666;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.description {
+    text-transform: capitalize;
+    color: #333;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+.rain-info, .snow-info {
+    color: #667eea;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.chart-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.footer {
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+@media (max-width: 768px) {
+    .forecast-items {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+
+
+

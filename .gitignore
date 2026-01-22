@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+/comparemedium.json
+/compareregular.json
+/hourly_16.json

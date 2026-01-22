@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Map</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/map.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-cloud-sun"></i> Weather Dashboard
+            </a>
+            <div class="ms-auto">
+                <a href="/" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="map-header">
+            <h1><i class="fas fa-map"></i> Weather Map</h1>
+            <p>Interactive weather map powered by OpenWeatherMap</p>
+        </div>
+
+        <div class="map-controls mb-3">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" id="citySearch" class="form-control" placeholder="Search city...">
+                        <button class="btn btn-primary" onclick="searchCity()">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button class="btn btn-info" onclick="getCurrentLocation()">
+                            <i class="fas fa-map-marker-alt"></i> My Location
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="layer-control-info">
+                        <small><i class="fas fa-info-circle"></i> Use the layer control (top-right) to toggle weather layers</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="map" class="weather-map"></div>
+
+        <div class="map-info mt-3">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="fas fa-info-circle"></i>
+                        <h5>How to Use</h5>
+                        <p>Click on the map or search for a city to view weather information</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="fas fa-layer-group"></i>
+                        <h5>Map Layers</h5>
+                        <p>Toggle weather layers using the control in the top-right corner of the map</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <h5>Interactive</h5>
+                        <p>Click any location to get detailed weather information</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="data-source-info mt-3">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-database"></i> Data Source & Accuracy</h6>
+                    <p class="mb-2"><strong>Data Source:</strong> Weather map layers are provided by <a href="https://openweathermap.org/api/weather-map-2" target="_blank">OpenWeatherMap</a> tile service. The data comes from global weather models, satellites, and radar systems.</p>
+                    <p class="mb-2"><strong>Legend Note:</strong> The color scales shown in the legends are approximate interpretations. OpenWeatherMap uses proprietary color schemes that may vary. For more precise values, click on specific locations to view detailed weather data.</p>
+                    <p class="mb-0"><strong>Accuracy:</strong> Weather data is updated regularly, but as with any forecast system, there can be variations. Use as a general guide and consult local weather services for critical decisions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 Weather Dashboard - Powered by OpenWeatherMap API</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let map;
+        let marker;
+        const apiKey = '8220754c69ecd960654c48fdac534007';
+        
+        // Get map state from URL parameters or use defaults
+        const urlParams = new URLSearchParams(window.location.search);
+        const mapLat = urlParams.get('mapLat') ? parseFloat(urlParams.get('mapLat')) : null;
+        const mapLon = urlParams.get('mapLon') ? parseFloat(urlParams.get('mapLon')) : null;
+        const mapZoom = urlParams.get('mapZoom') ? parseInt(urlParams.get('mapZoom')) : null;
+        const mapScroll = urlParams.get('mapScroll') ? parseFloat(urlParams.get('mapScroll')) : null;
+        
+        // Get server-provided coordinates (from controller)
+        const serverLat = /*[[${lat}]]*/ null;
+        const serverLon = /*[[${lon}]]*/ null;
+        
+        // Use URL parameters if available (returning from weather), otherwise server values, otherwise defaults
+        const defaultLat = mapLat !== null ? mapLat : (serverLat !== null ? serverLat : 51.5074);
+        const defaultLon = mapLon !== null ? mapLon : (serverLon !== null ? serverLon : -0.1278);
+        const defaultZoom = mapZoom !== null ? mapZoom : 10;
+        
+        // Initialize map with restored or default state
+        map = L.map('map').setView([defaultLat, defaultLon], defaultZoom);
+        
+        // If returning from weather page, add marker at the location
+        if (mapLat !== null && mapLon !== null) {
+            marker = L.marker([mapLat, mapLon]).addTo(map);
+        }
+        
+        // Restore scroll position if returning from weather page
+        if (mapScroll !== null) {
+            // Use setTimeout to ensure DOM is fully loaded before scrolling
+            setTimeout(function() {
+                window.scrollTo(0, mapScroll);
+            }, 100);
+        }
+        
+        // Base map layer
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Weather map layers from OpenWeatherMap
+        const temperatureLayer = L.tileLayer('https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=' + apiKey, {
+            attribution: '© OpenWeatherMap',
+            opacity: 0.7,
+            maxZoom: 19
+        });
+        
+        const precipitationLayer = L.tileLayer('https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=' + apiKey, {
+            attribution: '© OpenWeatherMap',
+            opacity: 0.7,
+            maxZoom: 19
+        });
+        
+        const cloudsLayer = L.tileLayer('https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=' + apiKey, {
+            attribution: '© OpenWeatherMap',
+            opacity: 0.7,
+            maxZoom: 19
+        });
+        
+        const windLayer = L.tileLayer('https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=' + apiKey, {
+            attribution: '© OpenWeatherMap',
+            opacity: 0.7,
+            maxZoom: 19
+        });
+        
+        const pressureLayer = L.tileLayer('https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=' + apiKey, {
+            attribution: '© OpenWeatherMap',
+            opacity: 0.7,
+            maxZoom: 19
+        });
+        
+        // Create layer groups
+        const baseMaps = {
+            "OpenStreetMap": osmLayer
+        };
+        
+        const overlayMaps = {
+            "🌡️ Temperature": temperatureLayer,
+            "🌧️ Precipitation": precipitationLayer,
+            "☁️ Clouds": cloudsLayer,
+            "💨 Wind": windLayer,
+            "📊 Pressure": pressureLayer
+        };
+        
+        // Add layer control to map
+        const layerControl = L.control.layers(baseMaps, overlayMaps, {
+            position: 'topright',
+            collapsed: true
+        }).addTo(map);
+        
+        // Create custom legend control
+        const LegendControl = L.Control.extend({
+            onAdd: function(map) {
+                const div = L.DomUtil.create('div', 'weather-legend');
+                div.innerHTML = '<div class="legend-header"><strong>Layer Legends</strong></div>';
+                return div;
+            }
+        });
+        
+        const legendControl = new LegendControl({ position: 'bottomright' });
+        legendControl.addTo(map);
+        
+        // Create individual legends for each layer
+        function createTemperatureLegend() {
+            return `
+                <div class="legend-item" id="temp-legend" style="display: none;">
+                    <div class="legend-title">🌡️ Temperature (°C)</div>
+                    <div class="legend-note"><small><i class="fas fa-info-circle"></i> Approximate scale</small></div>
+                    <div class="legend-scale">
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #000080;"></span>
+                            <span>&lt; -40 (Very Cold)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #0000FF;"></span>
+                            <span>-40 to -20 (Cold)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #0080FF;"></span>
+                            <span>-20 to 0 (Freezing)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #00FFFF;"></span>
+                            <span>0 to 10 (Cool)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #80FF00;"></span>
+                            <span>10 to 20 (Mild)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FFFF00;"></span>
+                            <span>20 to 30 (Warm)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FF8000;"></span>
+                            <span>30 to 40 (Hot)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FF0000;"></span>
+                            <span>&gt; 40 (Very Hot)</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createPrecipitationLegend() {
+            return `
+                <div class="legend-item" id="precip-legend" style="display: none;">
+                    <div class="legend-title">🌧️ Precipitation (mm)</div>
+                    <div class="legend-note"><small><i class="fas fa-info-circle"></i> Approximate scale</small></div>
+                    <div class="legend-scale">
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #969696;"></span>
+                            <span>No precipitation</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #0064FF;"></span>
+                            <span>0.1 - 0.5</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #00B4FF;"></span>
+                            <span>0.5 - 1</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #00FFFF;"></span>
+                            <span>1 - 2</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #32FFC8;"></span>
+                            <span>2 - 5</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #C8FF64;"></span>
+                            <span>5 - 10</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FFC800;"></span>
+                            <span>10 - 20</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FF6400;"></span>
+                            <span>&gt; 20</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createCloudsLegend() {
+            return `
+                <div class="legend-item" id="clouds-legend" style="display: none;">
+                    <div class="legend-title">☁️ Cloud Coverage (%)</div>
+                    <div class="legend-note"><small><i class="fas fa-info-circle"></i> Approximate scale</small></div>
+                    <div class="legend-scale">
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FFFFFF;"></span>
+                            <span>0% (Clear)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #E6E6E6;"></span>
+                            <span>1 - 25%</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #CCCCCC;"></span>
+                            <span>25 - 50%</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #B3B3B3;"></span>
+                            <span>50 - 75%</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #999999;"></span>
+                            <span>75 - 100%</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createWindLegend() {
+            return `
+                <div class="legend-item" id="wind-legend" style="display: none;">
+                    <div class="legend-title">💨 Wind Speed (m/s)</div>
+                    <div class="legend-note"><small><i class="fas fa-info-circle"></i> Approximate scale</small></div>
+                    <div class="legend-scale">
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FFFFFF;"></span>
+                            <span>0 - 2 (Calm)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #E6FFE6;"></span>
+                            <span>2 - 5 (Light)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #CCFFCC;"></span>
+                            <span>5 - 10 (Moderate)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #99FF99;"></span>
+                            <span>10 - 15 (Fresh)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #66FF66;"></span>
+                            <span>15 - 20 (Strong)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #33FF33;"></span>
+                            <span>20 - 30 (Gale)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #00FF00;"></span>
+                            <span>&gt; 30 (Storm)</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createPressureLegend() {
+            return `
+                <div class="legend-item" id="pressure-legend" style="display: none;">
+                    <div class="legend-title">📊 Pressure (hPa)</div>
+                    <div class="legend-note"><small><i class="fas fa-info-circle"></i> Approximate scale</small></div>
+                    <div class="legend-scale">
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #800080;"></span>
+                            <span>&lt; 980 (Very Low)</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #0000FF;"></span>
+                            <span>980 - 1000</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #00FFFF;"></span>
+                            <span>1000 - 1013</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FFFF00;"></span>
+                            <span>1013 - 1020</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FF8000;"></span>
+                            <span>1020 - 1030</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-color" style="background: #FF0000;"></span>
+                            <span>&gt; 1030 (Very High)</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add legends to the legend control
+        const legendContainer = document.querySelector('.weather-legend');
+        legendContainer.innerHTML += createTemperatureLegend();
+        legendContainer.innerHTML += createPrecipitationLegend();
+        legendContainer.innerHTML += createCloudsLegend();
+        legendContainer.innerHTML += createWindLegend();
+        legendContainer.innerHTML += createPressureLegend();
+        
+        // Show/hide legends based on active layers
+        map.on('overlayadd', function(e) {
+            const layerName = e.name;
+            if (layerName.includes('Temperature')) {
+                document.getElementById('temp-legend').style.display = 'block';
+            } else if (layerName.includes('Precipitation')) {
+                document.getElementById('precip-legend').style.display = 'block';
+            } else if (layerName.includes('Clouds')) {
+                document.getElementById('clouds-legend').style.display = 'block';
+            } else if (layerName.includes('Wind')) {
+                document.getElementById('wind-legend').style.display = 'block';
+            } else if (layerName.includes('Pressure')) {
+                document.getElementById('pressure-legend').style.display = 'block';
+            }
+        });
+        
+        map.on('overlayremove', function(e) {
+            const layerName = e.name;
+            if (layerName.includes('Temperature')) {
+                document.getElementById('temp-legend').style.display = 'none';
+            } else if (layerName.includes('Precipitation')) {
+                document.getElementById('precip-legend').style.display = 'none';
+            } else if (layerName.includes('Clouds')) {
+                document.getElementById('clouds-legend').style.display = 'none';
+            } else if (layerName.includes('Wind')) {
+                document.getElementById('wind-legend').style.display = 'none';
+            } else if (layerName.includes('Pressure')) {
+                document.getElementById('pressure-legend').style.display = 'none';
+            }
+        });
+        
+        // Map click handler
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+            
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            
+            marker = L.marker([lat, lon]).addTo(map);
+            marker.bindPopup('Loading weather...').openPopup();
+            
+            // Fetch weather for clicked location
+            fetchWeatherForLocation(lat, lon);
+        });
+        
+        function searchCity() {
+            const city = document.getElementById('citySearch').value;
+            if (city) {
+                window.location.href = '/weather?city=' + encodeURIComponent(city);
+            }
+        }
+        
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        map.setView([lat, lon], 13);
+                        
+                        if (marker) {
+                            map.removeLayer(marker);
+                        }
+                        
+                        marker = L.marker([lat, lon]).addTo(map);
+                        fetchWeatherForLocation(lat, lon);
+                    },
+                    function(error) {
+                        alert('Unable to retrieve your location');
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser');
+            }
+        }
+        
+        function fetchWeatherForLocation(lat, lon) {
+            // Get current map zoom level and scroll position for state preservation
+            const currentZoom = map.getZoom();
+            const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Try reverse geocoding to get city name for display, but always provide coordinate-based link
+            fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=8220754c69ecd960654c48fdac534007`)
+                .then(response => response.json())
+                .then(data => {
+                    // Always use coordinates for weather lookup (more reliable)
+                    // Include map state (position, zoom, scroll) for return navigation
+                    const weatherUrl = `/weather?lat=${lat}&lon=${lon}&returnTo=map&mapLat=${lat}&mapLon=${lon}&mapZoom=${currentZoom}&mapScroll=${scrollPosition}`;
+                    
+                    if (data && data.length > 0 && data[0].name) {
+                        const cityName = data[0].name;
+                        marker.bindPopup(`<a href="${weatherUrl}">View weather for ${cityName}</a>`).openPopup();
+                    } else {
+                        // If no city name found, still show weather link with coordinates
+                        marker.bindPopup(`<a href="${weatherUrl}">View weather at ${lat.toFixed(4)}, ${lon.toFixed(4)}</a>`).openPopup();
+                    }
+                })
+                .catch(error => {
+                    // Even if geocoding fails, provide weather link by coordinates
+                    const weatherUrl = `/weather?lat=${lat}&lon=${lon}&returnTo=map&mapLat=${lat}&mapLon=${lon}&mapZoom=${currentZoom}&mapScroll=${scrollPosition}`;
+                    marker.bindPopup(`<a href="${weatherUrl}">View weather at ${lat.toFixed(4)}, ${lon.toFixed(4)}</a>`).openPopup();
+                });
+        }
+        
+        // Allow Enter key to search
+        document.getElementById('citySearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchCity();
+            }
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>
+
